@@ -23,19 +23,13 @@ public class TablesToCompare {
         try {
             resultSet1 = statement1.executeQuery("SELECT * FROM users");
             resultSet2 = statement2.executeQuery("SELECT * FROM users");
-
             resultSet1.last();
-            int rowCount = resultSet1.getRow();
-            resultSet1.first();
-//            for (int i = 0; i < columns.length; i++) {
-//                while (resultSet1.next()) {
-//                    Map<String, String> map = new HashMap<String, String>();
-//                    map.put(columns[i], resultSet1.getString(columns[i]));
-//                    listOfMapsForDB1.add(map);
-//                }
-//            }
-
-            IntStream.range(0, 39)
+            int rowCount1 = resultSet1.getRow();
+            resultSet1.beforeFirst();
+            resultSet2.last();
+            int rowCount2 = resultSet2.getRow();
+            resultSet2.beforeFirst();
+            IntStream.range(0, rowCount1)
                     .forEach(i -> {
                                 try {
                                     if (resultSet1.next()) {
@@ -45,56 +39,36 @@ public class TablesToCompare {
                                                         Map<String, String> map = new HashMap<String, String>();
                                                         map.put(columns[a], resultSet1.getString(columns[a]));
                                                         listOfMapsForDB1.add(map);
-                                                } catch(SQLException e){
-                                            e.printStackTrace();
-                                        }});
+                                                    } catch (SQLException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                });
                                     }
                                 } catch (SQLException e) {
                                     e.printStackTrace();
                                 }
                             }
                     );
-
-
-            while (resultSet2.next()) {
-                IntStream.range(0, columns.length)
-                        .forEach(i -> {
-                                    try {
-                                        Map<String, String> map = new HashMap<String, String>();
-                                        map.put(columns[i], resultSet2.getString(columns[i]));
-                                        listOfMapsForDB2.add(map);
-                                    } catch (SQLException e) {
-                                        e.printStackTrace();
+            IntStream.range(0, rowCount2)
+                    .forEach(i -> {
+                                try {
+                                    if (resultSet2.next()) {
+                                        IntStream.range(0, columns.length)
+                                                .forEach(a -> {
+                                                    try {
+                                                        Map<String, String> map = new HashMap<String, String>();
+                                                        map.put(columns[a], resultSet2.getString(columns[a]));
+                                                        listOfMapsForDB2.add(map);
+                                                    } catch (SQLException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                });
                                     }
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
                                 }
-                        );
-            }
-
-//            for (int i = 0; i < columns.length; i++) {
-//                (resultSet1::resultSet1){
-//                    listOfMapsForDB1.stream()
-//                            .collect(Collectors.toMap(columns[i], resultSet1.getString(columns[i]))).collect(Collectors.toList());
-//                }
-//            }
-
-//            listOfMapsForDB1 = listOfMapsForDB1.stream().flatMap(line->
-//                    map.entrySet().stream()
-////                            .filter(e->line.startsWith(e.getKey()))
-//                            .map(filteredEntry->line.replace(filteredEntry.getKey(),filteredEntry.getValue()))
-//            ).collect(Collectors.toList());
-//            IntStream.range(0, columns.length)
-//                    .forEach(index -> Collectors.toMap(columns[index], resultSet1.getString(columns[index])));
-
-//            Map<String, String> map = listOfMapsForDB1.stream()
-//
-            for (int i = 0; i < listOfMapsForDB1.size(); i++) {
-                System.out.println(listOfMapsForDB1.get(i));
-            }
-
-            System.out.println("___________________");
-            for (int i = 0; i < listOfMapsForDB2.size(); i++) {
-                System.out.println(listOfMapsForDB2.get(i));
-            }
+                            }
+                    );
             System.out.println("Значения таблиц по введенным столбцам равны? " +
                     listOfMapsForDB1.equals(listOfMapsForDB2));
             statement1.close();
@@ -127,7 +101,6 @@ public class TablesToCompare {
                 System.out.println("No DB connection");
                 System.exit(0);
             }
-
             statement1 = connection1.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             connection2 = DriverManager.getConnection("jdbc:postgresql://localhost:5432/db2_hw5",
                     "postgres", "postgres");
@@ -135,7 +108,7 @@ public class TablesToCompare {
                 System.out.println("No DB connection");
                 System.exit(0);
             }
-            statement2 = connection2.createStatement();
+            statement2 = connection2.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             compareTables("id", "first_name", "last_name");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -163,7 +136,6 @@ public class TablesToCompare {
                     statement2.close();
                 }
             } catch (Exception e) {
-
             }
         }
     }
