@@ -69,6 +69,9 @@ public class TablesToCompare {
                                 }
                             }
                     );
+            
+            
+            
             System.out.println("Значения таблиц по введенным столбцам равны? " +
                     listOfMapsForDB1.equals(listOfMapsForDB2));
             statement1.close();
