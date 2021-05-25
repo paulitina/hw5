@@ -1,10 +1,8 @@
 package hw5;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class TablesToCompare {
@@ -17,27 +15,47 @@ public class TablesToCompare {
     public static List<Map<String, String>> listOfMapsForDB1 = new ArrayList<>();
     public static List<Map<String, String>> listOfMapsForDB2 = new ArrayList<>();
 
-    private static void addResultSetToList(int rowCount, ResultSet resultSet, List<Map<String, String>> listOfMapsForDB, String... columns){
-        IntStream.range(0, rowCount)
-                .forEach(i -> {
+    private static class MapEntry {
+        private String key;
+        private String value;
+
+        public MapEntry(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+    }
+
+    private static List<Map<String, String>> addResultSetToList(int rowCount, ResultSet resultSet, String... columns) {
+        return IntStream.range(0, rowCount)
+                .mapToObj(i -> {
                             try {
                                 if (resultSet.next()) {
-                                    IntStream.range(0, columns.length)
-                                            .forEach(a -> {
+                                    return Arrays.stream(columns)
+                                            .map(columnName -> {
                                                 try {
-                                                    Map<String, String> map = new HashMap<>();
-                                                    map.put(columns[a], resultSet.getString(columns[a]));
-                                                    listOfMapsForDB.add(map);
+                                                    return new MapEntry(columnName, resultSet.getString(columnName));
                                                 } catch (SQLException e) {
                                                     e.printStackTrace();
+                                                    return null;
                                                 }
-                                            });
+                                            })
+                                            .filter(Objects::nonNull)
+                                            .collect(Collectors.groupingBy(MapEntry::getKey));
+                                } else {
+                                    return null;
                                 }
                             } catch (SQLException e) {
                                 e.printStackTrace();
+                                return null;
                             }
                         }
-                );
+                )
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
 
@@ -51,7 +69,7 @@ public class TablesToCompare {
             resultSet2.last();
             int rowCount2 = resultSet2.getRow();
             resultSet2.beforeFirst();
-            addResultSetToList(rowCount1, resultSet1, listOfMapsForDB1, columns);
+            List<Map<String, String>> listOfMapsForDB1 = addResultSetToList(rowCount1, resultSet1, columns);
             addResultSetToList(rowCount2, resultSet2, listOfMapsForDB2, columns);
             System.out.println("Значения таблиц по введенным столбцам равны? " +
                     listOfMapsForDB1.equals(listOfMapsForDB2));
