@@ -1,11 +1,10 @@
 package hw5;
 
-import org.postgresql.util.PSQLException;
-
 import java.sql.*;
-import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 public class TablesToCompare {
@@ -15,9 +14,8 @@ public class TablesToCompare {
     public static Statement statement2;
     public static ResultSet resultSet1;
     public static ResultSet resultSet2;
-    public static List<Map<String, String>> listOfMapsForDB1 = new ArrayList<Map<String, String>>();
-    public static List<Map<String, String>> listOfMapsForDB2 = new ArrayList<Map<String, String>>();
-    public static Map<String, String> map = new HashMap<String, String>();
+    public static List<Map<String, String>> listOfMapsForDB1 = new ArrayList<>();
+    public static List<Map<String, String>> listOfMapsForDB2 = new ArrayList<>();
 
     public static void compareTables(String... columns) {
         try {
@@ -36,7 +34,7 @@ public class TablesToCompare {
                                         IntStream.range(0, columns.length)
                                                 .forEach(a -> {
                                                     try {
-                                                        Map<String, String> map = new HashMap<String, String>();
+                                                        Map<String, String> map = new HashMap<>();
                                                         map.put(columns[a], resultSet1.getString(columns[a]));
                                                         listOfMapsForDB1.add(map);
                                                     } catch (SQLException e) {
@@ -56,7 +54,7 @@ public class TablesToCompare {
                                         IntStream.range(0, columns.length)
                                                 .forEach(a -> {
                                                     try {
-                                                        Map<String, String> map = new HashMap<String, String>();
+                                                        Map<String, String> map = new HashMap<>();
                                                         map.put(columns[a], resultSet2.getString(columns[a]));
                                                         listOfMapsForDB2.add(map);
                                                     } catch (SQLException e) {
@@ -69,9 +67,8 @@ public class TablesToCompare {
                                 }
                             }
                     );
-            
-            
-            
+
+
             System.out.println("Значения таблиц по введенным столбцам равны? " +
                     listOfMapsForDB1.equals(listOfMapsForDB2));
             statement1.close();
