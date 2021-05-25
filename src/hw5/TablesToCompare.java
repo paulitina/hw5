@@ -17,6 +17,30 @@ public class TablesToCompare {
     public static List<Map<String, String>> listOfMapsForDB1 = new ArrayList<>();
     public static List<Map<String, String>> listOfMapsForDB2 = new ArrayList<>();
 
+    private static void addResultSetToList(int rowCount, ResultSet resultSet, List<Map<String, String>> listOfMapsForDB, String... columns){
+        IntStream.range(0, rowCount)
+                .forEach(i -> {
+                            try {
+                                if (resultSet.next()) {
+                                    IntStream.range(0, columns.length)
+                                            .forEach(a -> {
+                                                try {
+                                                    Map<String, String> map = new HashMap<>();
+                                                    map.put(columns[a], resultSet.getString(columns[a]));
+                                                    listOfMapsForDB.add(map);
+                                                } catch (SQLException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            });
+                                }
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                );
+    }
+
+
     public static void compareTables(String... columns) {
         try {
             resultSet1 = statement1.executeQuery("SELECT * FROM users");
@@ -27,48 +51,8 @@ public class TablesToCompare {
             resultSet2.last();
             int rowCount2 = resultSet2.getRow();
             resultSet2.beforeFirst();
-            IntStream.range(0, rowCount1)
-                    .forEach(i -> {
-                                try {
-                                    if (resultSet1.next()) {
-                                        IntStream.range(0, columns.length)
-                                                .forEach(a -> {
-                                                    try {
-                                                        Map<String, String> map = new HashMap<>();
-                                                        map.put(columns[a], resultSet1.getString(columns[a]));
-                                                        listOfMapsForDB1.add(map);
-                                                    } catch (SQLException e) {
-                                                        e.printStackTrace();
-                                                    }
-                                                });
-                                    }
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                    );
-            IntStream.range(0, rowCount2)
-                    .forEach(i -> {
-                                try {
-                                    if (resultSet2.next()) {
-                                        IntStream.range(0, columns.length)
-                                                .forEach(a -> {
-                                                    try {
-                                                        Map<String, String> map = new HashMap<>();
-                                                        map.put(columns[a], resultSet2.getString(columns[a]));
-                                                        listOfMapsForDB2.add(map);
-                                                    } catch (SQLException e) {
-                                                        e.printStackTrace();
-                                                    }
-                                                });
-                                    }
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                    );
-
-
+            addResultSetToList(rowCount1, resultSet1, listOfMapsForDB1, columns);
+            addResultSetToList(rowCount2, resultSet2, listOfMapsForDB2, columns);
             System.out.println("Значения таблиц по введенным столбцам равны? " +
                     listOfMapsForDB1.equals(listOfMapsForDB2));
             statement1.close();
