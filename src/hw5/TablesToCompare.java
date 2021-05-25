@@ -108,6 +108,8 @@ public class TablesToCompare {
                 System.out.println("No DB connection");
                 System.exit(0);
             }
+
+
             statement2 = connection2.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             compareTables("id", "first_name", "last_name");
         } catch (SQLException e) {
