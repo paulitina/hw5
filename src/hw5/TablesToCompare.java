@@ -58,19 +58,26 @@ public class TablesToCompare {
                 .collect(Collectors.toList());
     }
 
+    private static int getRowCount(ResultSet resultSet){
+        try{
+            resultSet.last();
+            int rowCount = resultSet.getRow();
+            resultSet.beforeFirst();
+            return rowCount;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return 0;
+        }
+    }
 
     public static void compareTables(String... columns) {
         try {
             resultSet1 = statement1.executeQuery("SELECT * FROM users");
             resultSet2 = statement2.executeQuery("SELECT * FROM users");
-            resultSet1.last();
-            int rowCount1 = resultSet1.getRow();
-            resultSet1.beforeFirst();
-            resultSet2.last();
-            int rowCount2 = resultSet2.getRow();
-            resultSet2.beforeFirst();
-            List<Map<String, String>> listOfMapsForDB1 = addResultSetToList(rowCount1, resultSet1, columns);
-            addResultSetToList(rowCount2, resultSet2, listOfMapsForDB2, columns);
+            int rowCount1 = getRowCount(resultSet1);
+            int rowCount2 = getRowCount(resultSet2);
+            listOfMapsForDB1 = addResultSetToList(rowCount1, resultSet1, columns);
+            listOfMapsForDB2 = addResultSetToList(rowCount2, resultSet2, columns);
             System.out.println("Значения таблиц по введенным столбцам равны? " +
                     listOfMapsForDB1.equals(listOfMapsForDB2));
             statement1.close();
