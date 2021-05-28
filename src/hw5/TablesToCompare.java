@@ -1,5 +1,7 @@
 package hw5;
 
+import com.sun.javafx.collections.MappingChange;
+
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,10 +29,22 @@ public class TablesToCompare {
         public String getKey() {
             return key;
         }
+
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return "MapEntry{" +
+                    "key='" + key + '\'' +
+                    ", value='" + value + '\'' +
+                    '}';
+        }
     }
 
     private static List<Map<String, String>> addResultSetToList(int rowCount, ResultSet resultSet, String... columns) {
-        return IntStream.range(0, rowCount)
+       return IntStream.range(0, rowCount)
                 .mapToObj(i -> {
                             try {
                                 if (resultSet.next()) {
@@ -44,7 +58,7 @@ public class TablesToCompare {
                                                 }
                                             })
                                             .filter(Objects::nonNull)
-                                            .collect(Collectors.groupingBy(MapEntry::getKey));
+                                            .collect(Collectors.toMap(MapEntry::getKey, MapEntry::getValue));
                                 } else {
                                     return null;
                                 }
@@ -54,9 +68,25 @@ public class TablesToCompare {
                             }
                         }
                 )
-                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
+
+//    private static List<Map<String, String>> addResultSetToList(int rowCount, ResultSet resultSet, String... columns) {
+//        return IntStream.range(0, rowCount)
+//                .mapToObj(i -> {
+//                                if (resultSet.next()) {
+//                                    return Arrays.stream(columns)
+//                                            .map(columnName -> {
+//                                                    return new MapEntry(columnName, resultSet.getString(columnName));
+//                                            })
+//                                            .filter(Objects::nonNull)
+//                                            .collect(Collectors.groupingBy(MapEntry::getKey));
+//                                }
+//                        }
+//                )
+//                .filter(Objects::nonNull)
+//                .collect(Collectors.toList());
+//    }
 
     private static int getRowCount(ResultSet resultSet){
         try{
